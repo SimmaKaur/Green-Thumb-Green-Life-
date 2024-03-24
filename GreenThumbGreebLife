@@ -1,0 +1,100 @@
+  //declare all variables
+int lowerUv;
+int upperUv;
+int uvSensor = 6;
+int uvLed = 13;
+int lowerMoisture;
+int upperMoisture;
+int soilSensor = 7;
+int soilLed = 12;
+int joyXValue = 2;
+int joyYValue = 3;
+int joyButton = 4;
+  //library to help the joystick function
+#include <ezButton.h>
+ezButton button(4);
+
+void setup() {
+Serial.begin(9600);
+  //set all pins
+pinMode(uvSensor,INPUT); 
+pinMode(uvLed, OUTPUT);
+pinMode(soilSensor, INPUT);
+pinMode(soilLed, OUTPUT);
+pinMode(joyXValue, INPUT);
+pinMode(joyYValue, INPUT);
+pinMode(joyButton, INPUT);
+button.setDebounceTime(50); 
+}
+void loop() {
+button.loop(); // MUST call the loop() function first
+ //joystick determining plant types: assigning variables to the values given by the joystick
+int xReading = analogRead(joyXValue);
+int yReading = analogRead(joyYValue);
+
+  lowerUv = 795;
+  upperUv = 1170;
+  lowerMoisture = 300;
+  upperMoisture = 500;
+
+joyButton= button.getState();
+    // joystick button press: telling the arduino to check and report uv and soil moisture data if the joystick button is pressed
+if (button.isPressed()) {
+
+Serial.println("button");
+  //uv: assigning a variable to the uv data
+int uvSensorValue = analogRead(uvSensor);
+Serial.println(uvSensorValue);
+
+  //blink the (yellow) light assigned to uv if the uv recieved is too little for the given plant type
+if (uvSensorValue<lowerUv){
+  for (int i = 1; i <= 4; ++i) {
+    digitalWrite(uvLed, HIGH);
+    delay(1000);
+    digitalWrite(uvLed, LOW);
+    delay(1000);}
+    Serial.println("uvlow");
+  }
+  
+  //turn the (yellow) light assigned to uv off if the uv recieved is in the healthy range determined by plant type
+if (uvSensorValue>lowerUv && uvSensorValue<upperUv){
+  digitalWrite(uvLed,LOW);
+  Serial.println("uvnormal");
+  }
+
+  //turn the (yellow) light assigned to uv on (solid) if the uv received is too intense for that plant type
+if (uvSensorValue>upperUv){
+  digitalWrite(uvLed,HIGH);
+  delay(10000);
+   Serial.println("uvhigh");
+  }
+
+  //soil moisture: assigning a variable to soil moisture sensor data
+int soilSensorValue = analogRead(soilSensor);
+Serial.println(soilSensorValue);
+  //blink the (blue) light assigned to soil moisture if the soil moisture recieved is too little for the given plant type
+if (soilSensorValue<lowerMoisture){
+  for (int i = 1; i <= 4; ++i) {
+    digitalWrite(soilLed, HIGH);
+    delay(1000);
+    digitalWrite(soilLed, LOW);
+    delay(1000);}
+    Serial.println("soillow");
+  }
+
+  //turn the (blue) light assigned to soil moisture off if the soil moisture recieved is in the healthy range determined by plant type
+if (soilSensorValue>lowerMoisture && soilSensorValue<upperMoisture){
+  digitalWrite(soilLed,LOW);
+  Serial.println("soilnormal");
+  }
+
+  //turn the (blue) light assigned to soil moisture on (solid) if the soil moisture received is too intense for that plant type
+if (soilSensorValue>upperMoisture){
+  digitalWrite(soilLed,HIGH);
+  delay(10000);
+   Serial.println("soilhigh");
+}
+}
+}
+
+
